@@ -171,17 +171,15 @@ interface ATProtoApi {
 
     @GET("/xrpc/app.bsky.graph.getStarterPacks")
     suspend fun getStarterPacks(
-        @Query("uris") uris: List<String>? = null,
-        @Query("limit") limit: Int? = null,
-        @Query("cursor") cursor: String? = null
-    ): Response<ResponseBody>
+        @Query("uris") uris: List<String>
+    ): StarterPacksResponse
 
     @GET("/xrpc/app.bsky.graph.getActorStarterPacks")
     suspend fun getActorStarterPacks(
         @Query("actor") actor: String,
         @Query("limit") limit: Int = 50,
         @Query("cursor") cursor: String? = null
-    ): Response<ResponseBody>
+    ): StarterPacksResponse
 }
 
 /**

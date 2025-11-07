@@ -474,6 +474,44 @@ class ATProtoClient private constructor() {
         return api.getPreferences()
     }
 
+    suspend fun putPreferences(preferences: List<Preference>) {
+        val preferencesMap = preferences.map { pref ->
+            when (pref) {
+                is Preference.SavedFeeds -> mapOf<String, Any>(
+                    "\$type" to "app.bsky.actor.defs#savedFeedsPref",
+                    "pinned" to pref.data.pinned,
+                    "saved" to pref.data.saved
+                )
+                is Preference.PersonalDetails -> mapOf<String, Any>(
+                    "\$type" to "app.bsky.actor.defs#personalDetailsPref",
+                    "birthDate" to (pref.data.birthDate ?: "")
+                )
+                else -> mapOf<String, Any>()
+            }
+        }
+
+        val body = mapOf("preferences" to preferencesMap)
+        api.putPreferences(body)
+    }
+
+    // MARK: - Lists and Starter Packs
+
+    suspend fun getList(list: String, limit: Int = 100, cursor: String? = null): ListResponse {
+        return api.getList(list, limit, cursor)
+    }
+
+    suspend fun getStarterPacks(uris: List<String>): StarterPacksResponse {
+        return api.getStarterPacks(uris)
+    }
+
+    suspend fun getActorStarterPacks(
+        actor: String,
+        limit: Int = 50,
+        cursor: String? = null
+    ): StarterPacksResponse {
+        return api.getActorStarterPacks(actor, limit, cursor)
+    }
+
     // MARK: - Chat Operations
 
     suspend fun listConvos(limit: Int = 50, cursor: String? = null): ListConvosResponse {
