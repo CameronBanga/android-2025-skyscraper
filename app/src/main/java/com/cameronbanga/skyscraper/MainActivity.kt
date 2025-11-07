@@ -10,14 +10,17 @@ import androidx.compose.foundation.layout.Alignment
 import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cameronbanga.skyscraper.ui.screens.ChatListScreen
 import com.cameronbanga.skyscraper.ui.screens.LoginScreen
+import com.cameronbanga.skyscraper.ui.screens.SearchScreen
 import com.cameronbanga.skyscraper.ui.screens.TimelineScreen
 import com.cameronbanga.skyscraper.viewmodels.AuthViewModel
 import androidx.compose.material3.Scaffold
@@ -86,17 +89,10 @@ fun SkyscraperApp() {
             ) {
                 when (currentDestination) {
                     AppDestinations.HOME -> TimelineScreen()
-                    AppDestinations.FAVORITES -> {
-                        // TODO: Implement FavoritesScreen
-                        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                            Greeting(
-                                name = "Favorites (Coming Soon)",
-                                modifier = Modifier.padding(innerPadding)
-                            )
-                        }
-                    }
+                    AppDestinations.SEARCH -> SearchScreen()
+                    AppDestinations.CHAT -> ChatListScreen()
                     AppDestinations.PROFILE -> {
-                        // TODO: Implement ProfileScreen
+                        // TODO: Implement full ProfileScreen
                         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
                             Greeting(
                                 name = "Profile (Coming Soon)",
@@ -124,7 +120,8 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     HOME("Home", Icons.Default.Home),
-    FAVORITES("Favorites", Icons.Default.Favorite),
+    SEARCH("Search", Icons.Default.Search),
+    CHAT("Chat", Icons.Default.Email),
     PROFILE("Profile", Icons.Default.AccountBox),
 }
 
