@@ -105,6 +105,11 @@ dependencies {
     // Work Manager for background tasks
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 
+    // ML Kit for image analysis
+    implementation("com.google.mlkit:image-labeling:17.0.9")
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+    implementation("com.google.mlkit:object-detection:17.0.2")
+
     // Testing
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

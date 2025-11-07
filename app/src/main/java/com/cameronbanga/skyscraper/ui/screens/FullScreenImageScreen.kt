@@ -1,7 +1,11 @@
 package com.cameronbanga.skyscraper.ui.screens
 
-import android.content.Intent
-import android.graphics.Bitmap
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -25,21 +29,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.core.content.FileProvider
+import androidx.core.content.ContextCompat
 import coil.compose.AsyncImage
 import com.cameronbanga.skyscraper.models.ImageView
-import kotlinx.coroutines.Dispatchers
+import com.cameronbanga.skyscraper.services.ImageUtils
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import java.io.File
-import java.io.FileOutputStream
 
 /**
  * Full-screen image viewer with paging and zoom support
- *
- * Note: This is a simplified version of the iOS FullScreenImageView.
- * Advanced features like pinch-to-zoom gestures, swipe-to-dismiss,
- * and image saving require additional platform-specific implementation.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -55,8 +52,37 @@ fun FullScreenImageScreen(
 
     var isAltTextExpanded by remember { mutableStateOf(false) }
     var showOptionsMenu by remember { mutableStateOf(false) }
+    var isProcessing by remember { mutableStateOf(false) }
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    // Permission launcher for saving images (Android 9 and below)
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            val currentImage = images.getOrNull(pagerState.currentPage)
+            if (currentImage != null) {
+                scope.launch {
+                    isProcessing = true
+                    try {
+                        val success = ImageUtils.saveImageToGallery(context, currentImage.fullsize)
+                        if (success) {
+                            Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                    } finally {
+                        isProcessing = false
+                    }
+                }
+            }
+        } else {
+            Toast.makeText(context, "Permission denied", Toast.LENGTH_SHORT).show()
+        }
+    }
 
     Box(
         modifier = Modifier
@@ -189,7 +215,19 @@ fun FullScreenImageScreen(
                 text = { Text("Share Image") },
                 onClick = {
                     showOptionsMenu = false
-                    // TODO: Implement image sharing
+                    val currentImage = images.getOrNull(pagerState.currentPage)
+                    if (currentImage != null) {
+                        scope.launch {
+                            isProcessing = true
+                            try {
+                                ImageUtils.shareImage(context, currentImage.fullsize)
+                            } catch (e: Exception) {
+                                Toast.makeText(context, "Failed to share: ${e.message}", Toast.LENGTH_SHORT).show()
+                            } finally {
+                                isProcessing = false
+                            }
+                        }
+                    }
                 },
                 leadingIcon = {
                     Icon(Icons.Default.Share, contentDescription = null)
@@ -199,12 +237,70 @@ fun FullScreenImageScreen(
                 text = { Text("Save to Gallery") },
                 onClick = {
                     showOptionsMenu = false
-                    // TODO: Implement image saving
+                    val currentImage = images.getOrNull(pagerState.currentPage)
+                    if (currentImage != null) {
+                        // Check if we need to request permission (Android 9 and below)
+                        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.Q) {
+                            val hasPermission = ContextCompat.checkSelfPermission(
+                                context,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                            ) == PackageManager.PERMISSION_GRANTED
+
+                            if (hasPermission) {
+                                scope.launch {
+                                    isProcessing = true
+                                    try {
+                                        val success = ImageUtils.saveImageToGallery(context, currentImage.fullsize)
+                                        if (success) {
+                                            Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
+                                        } else {
+                                            Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
+                                        }
+                                    } catch (e: Exception) {
+                                        Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                    } finally {
+                                        isProcessing = false
+                                    }
+                                }
+                            } else {
+                                permissionLauncher.launch(Manifest.permission.WRITE_EXTERNAL_STORAGE)
+                            }
+                        } else {
+                            // Android 10+ doesn't need permission for MediaStore
+                            scope.launch {
+                                isProcessing = true
+                                try {
+                                    val success = ImageUtils.saveImageToGallery(context, currentImage.fullsize)
+                                    if (success) {
+                                        Toast.makeText(context, "Image saved to gallery", Toast.LENGTH_SHORT).show()
+                                    } else {
+                                        Toast.makeText(context, "Failed to save image", Toast.LENGTH_SHORT).show()
+                                    }
+                                } catch (e: Exception) {
+                                    Toast.makeText(context, "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+                                } finally {
+                                    isProcessing = false
+                                }
+                            }
+                        }
+                    }
                 },
                 leadingIcon = {
                     Icon(Icons.Default.Download, contentDescription = null)
                 }
             )
+        }
+
+        // Loading overlay
+        if (isProcessing) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(Color.Black.copy(alpha = 0.5f)),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator(color = Color.White)
+            }
         }
     }
 }

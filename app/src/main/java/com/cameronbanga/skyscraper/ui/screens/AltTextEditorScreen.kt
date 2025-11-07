@@ -1,6 +1,7 @@
 package com.cameronbanga.skyscraper.ui.screens
 
 import android.graphics.Bitmap
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,6 +18,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cameronbanga.skyscraper.services.AppTheme
+import com.cameronbanga.skyscraper.services.ImageCaptionService
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -112,13 +114,31 @@ fun AltTextEditorScreen(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // AI Generate button (placeholder - needs ImageCaptionService)
+                        // AI Generate button
                         if (image != null) {
                             IconButton(
                                 onClick = {
-                                    // TODO: Implement AI alt text generation
-                                    errorMessage = "AI alt text generation coming soon"
-                                    showError = true
+                                    scope.launch {
+                                        isGeneratingAltText = true
+                                        try {
+                                            val captionService = ImageCaptionService.getInstance(context)
+                                            val generatedText = captionService.generateAltText(image)
+
+                                            // If user hasn't typed anything, replace. Otherwise, replace anyway
+                                            altText = generatedText
+
+                                            Toast.makeText(
+                                                context,
+                                                "Alt text generated successfully",
+                                                Toast.LENGTH_SHORT
+                                            ).show()
+                                        } catch (e: Exception) {
+                                            errorMessage = e.message ?: "Failed to generate alt text"
+                                            showError = true
+                                        } finally {
+                                            isGeneratingAltText = false
+                                        }
+                                    }
                                 },
                                 enabled = !isGeneratingAltText
                             ) {
