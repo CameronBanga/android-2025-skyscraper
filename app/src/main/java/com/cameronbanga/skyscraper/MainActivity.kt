@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
 import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
@@ -19,7 +21,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.cameronbanga.skyscraper.ui.screens.ChatListScreen
+import com.cameronbanga.skyscraper.ui.screens.DiscoverScreen
 import com.cameronbanga.skyscraper.ui.screens.LoginScreen
+import com.cameronbanga.skyscraper.ui.screens.NotificationsScreen
 import com.cameronbanga.skyscraper.ui.screens.SearchScreen
 import com.cameronbanga.skyscraper.ui.screens.TimelineScreen
 import com.cameronbanga.skyscraper.viewmodels.AuthViewModel
@@ -90,7 +94,8 @@ fun SkyscraperApp() {
                 when (currentDestination) {
                     AppDestinations.HOME -> TimelineScreen()
                     AppDestinations.SEARCH -> SearchScreen()
-                    AppDestinations.CHAT -> ChatListScreen()
+                    AppDestinations.DISCOVER -> DiscoverScreen()
+                    AppDestinations.NOTIFICATIONS -> NotificationsScreen()
                     AppDestinations.PROFILE -> {
                         // TODO: Implement full ProfileScreen
                         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
@@ -121,7 +126,8 @@ enum class AppDestinations(
 ) {
     HOME("Home", Icons.Default.Home),
     SEARCH("Search", Icons.Default.Search),
-    CHAT("Chat", Icons.Default.Email),
+    DISCOVER("Discover", Icons.Default.Explore),
+    NOTIFICATIONS("Activity", Icons.Default.Notifications),
     PROFILE("Profile", Icons.Default.AccountBox),
 }
 
