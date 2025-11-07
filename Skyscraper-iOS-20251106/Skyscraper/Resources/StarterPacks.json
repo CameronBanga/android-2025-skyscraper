@@ -1,0 +1,40 @@
+{
+  "starterPacks": [
+    {
+      "name": "GiantBomb & Friends",
+      "handle": "chrislenz.bsky.social",
+      "rkey": "3larcd2klyi2d",
+      "category": "Community"
+    },
+    {
+      "name": "Shaddmain's Starter Pack",
+      "handle": "shaddmain.bsky.social",
+      "rkey": "3m336oa2f5j22",
+      "category": "Community"
+    },
+    {
+      "name": "Astronomy Starter Pack",
+      "handle": "emily.space",
+      "rkey": "3kvvsi4qacz2p",
+      "category": "Community"
+    },
+    {
+      "name": "Indie Devs at $100 to $10k MRR",
+      "handle": "geetfun.com",
+      "rkey": "3lbld4g4vwe2h",
+      "category": "Community"
+    },
+    {
+      "name": "Linux and Open Source accounts",
+      "handle": "gamingonlinux.com",
+      "rkey": "3l742l3upcl2v",
+      "category": "Community"
+    },
+    {
+      "name": "Podcaster's Starter Pack",
+      "handle": "briancasel.com",
+      "rkey": "3l7l7pt5mkf24",
+      "category": "Community"
+    }
+  ]
+}
