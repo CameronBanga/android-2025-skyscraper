@@ -6,11 +6,27 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.Alignment
+import androidx.compose.foundation.layout.Box
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountBox
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Explore
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Notifications
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.cameronbanga.skyscraper.ui.screens.ChatListScreen
+import com.cameronbanga.skyscraper.ui.screens.DiscoverScreen
+import com.cameronbanga.skyscraper.ui.screens.LoginScreen
+import com.cameronbanga.skyscraper.ui.screens.NotificationsScreen
+import com.cameronbanga.skyscraper.ui.screens.SearchScreen
+import com.cameronbanga.skyscraper.ui.screens.TimelineScreen
+import com.cameronbanga.skyscraper.viewmodels.AuthViewModel
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.adaptive.navigationsuite.NavigationSuiteScaffold
@@ -40,29 +56,65 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun SkyscraperApp() {
-    var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+    val authViewModel: AuthViewModel = viewModel()
+    val isAuthenticated by authViewModel.isAuthenticated.collectAsState()
+    val isCheckingSession by authViewModel.isCheckingSession.collectAsState()
 
-    NavigationSuiteScaffold(
-        navigationSuiteItems = {
-            AppDestinations.entries.forEach {
-                item(
-                    icon = {
-                        Icon(
-                            it.icon,
-                            contentDescription = it.label
-                        )
-                    },
-                    label = { Text(it.label) },
-                    selected = it == currentDestination,
-                    onClick = { currentDestination = it }
-                )
+    when {
+        isCheckingSession -> {
+            // Splash screen while checking for saved session
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
             }
         }
-    ) {
-        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-            Greeting(
-                name = "Android",
-                modifier = Modifier.padding(innerPadding)
+        isAuthenticated -> {
+            // Main app with navigation
+            var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
+
+            NavigationSuiteScaffold(
+                navigationSuiteItems = {
+                    AppDestinations.entries.forEach {
+                        item(
+                            icon = {
+                                Icon(
+                                    it.icon,
+                                    contentDescription = it.label
+                                )
+                            },
+                            label = { Text(it.label) },
+                            selected = it == currentDestination,
+                            onClick = { currentDestination = it }
+                        )
+                    }
+                }
+            ) {
+                when (currentDestination) {
+                    AppDestinations.HOME -> TimelineScreen()
+                    AppDestinations.SEARCH -> SearchScreen()
+                    AppDestinations.DISCOVER -> DiscoverScreen()
+                    AppDestinations.NOTIFICATIONS -> NotificationsScreen()
+                    AppDestinations.PROFILE -> {
+                        // TODO: Implement full ProfileScreen
+                        Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
+                            Greeting(
+                                name = "Profile (Coming Soon)",
+                                modifier = Modifier.padding(innerPadding)
+                            )
+                        }
+                    }
+                }
+            }
+        }
+        else -> {
+            // Login screen
+            LoginScreen(
+                viewModel = authViewModel,
+                onLoginSuccess = {
+                    // Authentication state will automatically update
+                }
             )
         }
     }
@@ -73,7 +125,9 @@ enum class AppDestinations(
     val icon: ImageVector,
 ) {
     HOME("Home", Icons.Default.Home),
-    FAVORITES("Favorites", Icons.Default.Favorite),
+    SEARCH("Search", Icons.Default.Search),
+    DISCOVER("Discover", Icons.Default.Explore),
+    NOTIFICATIONS("Activity", Icons.Default.Notifications),
     PROFILE("Profile", Icons.Default.AccountBox),
 }
 
