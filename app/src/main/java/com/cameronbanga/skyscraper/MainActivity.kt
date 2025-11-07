@@ -40,6 +40,8 @@ class MainActivity : ComponentActivity() {
 @PreviewScreenSizes
 @Composable
 fun SkyscraperApp() {
+    // TODO: Integrate AuthViewModel and LoginScreen
+    // For now, showing the existing navigation structure
     var currentDestination by rememberSaveable { mutableStateOf(AppDestinations.HOME) }
 
     NavigationSuiteScaffold(
@@ -61,7 +63,7 @@ fun SkyscraperApp() {
     ) {
         Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
             Greeting(
-                name = "Android",
+                name = "Skyscraper for Android",
                 modifier = Modifier.padding(innerPadding)
             )
         }
